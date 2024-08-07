@@ -19,25 +19,25 @@ export default function Home() {
           type="email"
           placeholder="Email"
           required
-          errors={[]}
+          errors={state?.fieldErrors?.email}
         />
         <FormInput
           name="username"
           type="text"
           placeholder="Username"
           required
-          errors={[]}
+          errors={state?.fieldErrors?.username}
         />
         <FormInput
           name="password"
           type="password"
           placeholder="Password"
           required
-          errors={state?.errors ?? []}
+          errors={state?.fieldErrors?.password}
         />
         <FormBtn text="Log in" />
       </form>
-      {state?.success === true ? (
+      {state?.success ? (
         <span className="text-green-500 font-semibold text-2xl">
           Welcome back!
         </span>
