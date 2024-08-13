@@ -12,11 +12,10 @@ export default function Login() {
 
   return (
     <div className="flex flex-col w-full gap-10 mt-10">
-      <Link href="/">
-        <h1 className="text-slate-700 font-semibold text-2xl">
-          Welcome To My World
-        </h1>
-      </Link>
+      <h1 className="text-slate-700 font-semibold text-2xl">
+        Welcome To My World
+      </h1>
+
       <form action={action} className="flex flex-col gap-4">
         <FormInput
           name="email"

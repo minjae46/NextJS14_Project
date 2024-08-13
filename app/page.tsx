@@ -1,25 +1,69 @@
-"use client";
+import db from "@/lib/db";
+import getSession from "@/lib/session";
+import { redirect } from "next/navigation";
+import TweetList from "@/components/tweet-list";
 
-import Link from "next/link";
+async function getUser() {
+  const session = await getSession();
+  if (session.id) {
+    const user = await db.user.findUnique({
+      where: {
+        id: session.id,
+      },
+    });
+    if (user) {
+      return user;
+    }
+  }
+}
 
-export default function Home() {
+async function getInitialTweets() {
+  // await new Promise((resolve) => setTimeout(resolve, 10000));
+  const tweets = await db.tweet.findMany({
+    select: {
+      id: true,
+      tweet: true,
+      created_at: true,
+      user: {
+        select: {
+          username: true,
+        },
+      },
+    },
+    take: 3,
+    orderBy: {
+      created_at: "desc",
+    },
+  });
+  return tweets;
+}
+
+export default async function Home() {
+  const user = await getUser();
+  const logOut = async () => {
+    "use server";
+    const session = await getSession();
+    await session.destroy();
+    redirect("/log-in");
+  };
+
+  const initialTweets = await getInitialTweets();
+
   return (
-    <div className="flex flex-col w-full gap-10 mt-10">
+    <div className="flex flex-col w-full gap-10 my-10">
       <h1 className="text-slate-700 font-semibold text-2xl">
-        Welcome To My World
+        Welcome, {user?.username}
       </h1>
-      <div className="flex flex-col gap-4">
-        <Link href="/create-account">
-          <div className="w-full h-10 flex justify-center items-center transition rounded-xl font-medium text-slate-600 bg-slate-200 hover:bg-slate-300">
-            Create account
-          </div>
-        </Link>
-        <Link href="/log-in">
-          <div className="w-full h-10 flex justify-center items-center transition rounded-xl font-medium text-slate-600 bg-slate-200 hover:bg-slate-300">
-            Log in
-          </div>
-        </Link>
-      </div>
+      <form action={logOut} className="flex justify-end">
+        <button className="text-slate-700 font-medium hover:text-slate-700 hover:font-bold transition">
+          로그아웃
+        </button>
+      </form>
+      {initialTweets.length ? (
+        <TweetList initialTweets={initialTweets} />
+      ) : (
+        <span>아직 트윗이 없습니다.</span>
+      )}
     </div>
   );
 }

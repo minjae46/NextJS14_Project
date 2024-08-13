@@ -6,7 +6,6 @@ interface Routes {
 }
 
 const publicOnlyUrls: Routes = {
-  "/": true,
   "/log-in": true,
   "/create-account": true,
 };
@@ -18,7 +17,7 @@ export async function middleware(request: NextRequest) {
     if (!exists) return NextResponse.redirect(new URL("/log-in", request.url));
     // 로그인되지 않은 유저가 public이외의 url에 접근하려 할 때.
   } else {
-    if (exists) return NextResponse.redirect(new URL("/profile", request.url));
+    if (exists) return NextResponse.redirect(new URL("/", request.url));
     // 로그인된 유저인데 public인 url에 접근하려 할 때.
   }
 }
