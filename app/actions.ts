@@ -1,6 +1,42 @@
 "use server";
 
 import db from "@/lib/db";
+import getSession from "@/lib/session";
+import { z } from "zod";
+import { redirect } from "next/navigation";
+
+const tweetSchema = z.object({
+  tweet: z
+    .string()
+    .min(5, "Tweet should be at least 5 characters long.")
+    .max(100, "The character limit has been exceeded."),
+});
+
+export async function addTweet(prevState: any, formData: FormData) {
+  const data = {
+    tweet: formData.get("tweet"),
+  };
+  const result = await tweetSchema.safeParse(data);
+
+  if (!result.success) {
+    return result.error.flatten();
+  } else {
+    const session = await getSession();
+    if (session.id) {
+      const tweet = await db.tweet.create({
+        data: {
+          tweet: result.data.tweet,
+          user: {
+            connect: {
+              id: session.id,
+            },
+          },
+        },
+      });
+      redirect(`tweets/${tweet.id}`);
+    }
+  }
+}
 
 export async function getNextTweets(cursorId: number) {
   const nextTweets = await db.tweet.findMany({

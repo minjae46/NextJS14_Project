@@ -2,6 +2,7 @@ import db from "@/lib/db";
 import getSession from "@/lib/session";
 import { redirect } from "next/navigation";
 import TweetList from "@/components/tweet-list";
+import AddTweet from "@/components/add-tweet";
 
 async function getUser() {
   const session = await getSession();
@@ -50,7 +51,7 @@ export default async function Home() {
   const initialTweets = await getInitialTweets();
 
   return (
-    <div className="flex flex-col w-full gap-10 my-10">
+    <div className="flex flex-col w-full gap-6 my-10">
       <h1 className="text-slate-700 font-semibold text-2xl">
         Welcome, {user?.username}
       </h1>
@@ -59,6 +60,7 @@ export default async function Home() {
           로그아웃
         </button>
       </form>
+      <AddTweet />
       {initialTweets.length ? (
         <TweetList initialTweets={initialTweets} />
       ) : (
