@@ -3,8 +3,8 @@
 import Link from "next/link";
 import ListTweet from "./list-tweet";
 import { useState } from "react";
-import { getNextTweets } from "@/app/actions";
-import { getPrevTweets } from "@/app/actions";
+import { getNextTweets } from "@/app/(home)/actions";
+import { getPrevTweets } from "@/app/(home)/actions";
 
 interface TweetListProps {
   initialTweets: {
@@ -13,6 +13,10 @@ interface TweetListProps {
     created_at: Date;
     user: {
       username: string;
+    };
+    _count: {
+      likes: number;
+      responses: number;
     };
   }[];
 }
@@ -61,7 +65,7 @@ export default function TweetList({ initialTweets }: TweetListProps) {
   };
 
   return (
-    <div className="flex flex-col justify-between h-96">
+    <div className="flex flex-col justify-between">
       <div className="flex flex-col gap-6">
         {tweets.map((tweet) => (
           <Link key={tweet.id} href={`/tweets/${tweet.id}`}>
@@ -69,7 +73,7 @@ export default function TweetList({ initialTweets }: TweetListProps) {
           </Link>
         ))}
       </div>
-      <div className="flex justify-between">
+      <div className="flex justify-between mt-10">
         {page === 1 ? (
           <button
             disabled={true}

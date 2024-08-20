@@ -1,12 +1,11 @@
 "use client";
 
 import { deleteTweet } from "@/app/tweets/[id]/actions";
-import FormBtn from "./form-btn";
 
-export default function DeleteTweet({ id }: { id: number }) {
+export default function DeleteTweet({ tweetId }: { tweetId: number }) {
   return (
-    <form action={() => deleteTweet(id)}>
-      <FormBtn text="Delete Tweet" />
+    <form action={() => deleteTweet(tweetId)}>
+      <button>삭제하기</button>
     </form>
   );
 }

@@ -49,6 +49,12 @@ export async function getNextTweets(cursorId: number) {
           username: true,
         },
       },
+      _count: {
+        select: {
+          likes: true,
+          responses: true,
+        },
+      },
     },
     cursor: { id: cursorId },
     skip: cursorId ? 1 : 0,
@@ -69,6 +75,12 @@ export async function getPrevTweets(cursorId: number, tweetslength: number) {
       user: {
         select: {
           username: true,
+        },
+      },
+      _count: {
+        select: {
+          likes: true,
+          responses: true,
         },
       },
     },

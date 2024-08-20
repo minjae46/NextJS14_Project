@@ -19,7 +19,6 @@ async function getUser() {
 }
 
 async function getInitialTweets() {
-  // await new Promise((resolve) => setTimeout(resolve, 10000));
   const tweets = await db.tweet.findMany({
     select: {
       id: true,
@@ -28,6 +27,12 @@ async function getInitialTweets() {
       user: {
         select: {
           username: true,
+        },
+      },
+      _count: {
+        select: {
+          likes: true,
+          responses: true,
         },
       },
     },
