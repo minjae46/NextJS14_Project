@@ -4,9 +4,23 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import DeleteTweet from "@/components/delete-tweet";
 import LikeTweet from "@/components/like-tweet";
-import { unstable_cache as nextCache, revalidatePath } from "next/cache";
+import { unstable_cache as nextCache } from "next/cache";
 import AddResponse from "@/components/add-response";
-import ResponseList from "@/components/response-list";
+
+async function getUsername() {
+  const session = await getSession();
+  if (session.id) {
+    const username = await db.user.findUnique({
+      where: {
+        id: session.id,
+      },
+      select: {
+        username: true,
+      },
+    });
+    return username;
+  }
+}
 
 async function getIsOwner(userId: number) {
   const session = await getSession();
@@ -16,10 +30,10 @@ async function getIsOwner(userId: number) {
   return false;
 }
 
-async function getTweet(id: number) {
+async function getTweet(tweetId: number) {
   const tweet = await db.tweet.findUnique({
     where: {
-      id,
+      id: tweetId,
     },
     include: {
       user: {
@@ -37,10 +51,6 @@ async function getTweet(id: number) {
   });
   return tweet;
 }
-const getCachedTweet = nextCache(getTweet, ["tweet-detail"], {
-  tags: ["tweet-detail"],
-  revalidate: 60,
-});
 
 async function getLikeStatus(tweetId: number, userId: number) {
   const isLiked = await db.like.findUnique({
@@ -64,16 +74,14 @@ async function getLikeStatus(tweetId: number, userId: number) {
 async function getCachedLikeStatus(tweetId: number) {
   const session = await getSession();
   const userId = session.id;
-  const cachedOperation = nextCache(getLikeStatus, ["tweet-like-status"], {
-    tags: [`like-status-${tweetId}`],
-  });
+  const cachedOperation = nextCache(getLikeStatus, ["tweet-like-status"]);
   return cachedOperation(tweetId, userId!);
 }
 
-async function getResponses(id: number) {
+async function getResponses(tweetId: number) {
   const responses = await db.response.findMany({
     where: {
-      tweetId: id,
+      tweetId,
     },
     select: {
       id: true,
@@ -97,20 +105,23 @@ export default async function TweetDetail({
 }: {
   params: { id: string };
 }) {
-  const id = Number(params.id);
-  if (isNaN(id)) {
+  const username = await getUsername();
+
+  const tweetId = Number(params.id);
+  if (isNaN(tweetId)) {
     return notFound();
   }
 
-  const tweet = await getCachedTweet(id);
+  const tweet = await getTweet(tweetId);
   if (!tweet) {
     return notFound();
   }
+
   const isOwner = await getIsOwner(tweet.userId);
 
-  const { isLiked, likeCount } = await getCachedLikeStatus(id);
+  const { isLiked, likeCount } = await getCachedLikeStatus(tweetId);
 
-  const responses = await getResponses(id);
+  const responses = await getCachedResponses(tweetId);
 
   return (
     <div className="flex flex-col w-full gap-10 my-10">
@@ -136,12 +147,14 @@ export default async function TweetDetail({
           <span className="text-md text-slate-500">{tweet.user.username}</span>
         </div>
       </div>
-      <LikeTweet isLiked={isLiked} likeCount={likeCount} tweetId={id} />
 
-      <AddResponse tweetId={id} />
-
-      <ResponseList responses={responses} />
-      {isOwner ? <DeleteTweet tweetId={id} /> : null}
+      <LikeTweet isLiked={isLiked} likeCount={likeCount} tweetId={tweetId} />
+      <AddResponse
+        tweetId={tweetId}
+        responses={responses}
+        username={username!.username}
+      />
+      {isOwner ? <DeleteTweet tweetId={tweetId} /> : null}
     </div>
   );
 }

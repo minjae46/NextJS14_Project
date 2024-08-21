@@ -4,7 +4,7 @@ import db from "@/lib/db";
 import getSession from "@/lib/session";
 import { z } from "zod";
 import { redirect } from "next/navigation";
-import { revalidateTag, revalidatePath } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 export async function likeTweet(tweetId: number) {
   const session = await getSession();
@@ -15,7 +15,7 @@ export async function likeTweet(tweetId: number) {
         userId: session.id!,
       },
     });
-    revalidateTag(`like-status-${tweetId}`);
+    revalidatePath(`/tweets/${tweetId}`);
   } catch (e) {}
 }
 
@@ -30,7 +30,7 @@ export async function dislikeTweet(tweetId: number) {
         },
       },
     });
-    revalidateTag(`like-status-${tweetId}`);
+    revalidatePath(`/tweets/${tweetId}`);
   } catch (e) {}
 }
 
@@ -41,13 +41,17 @@ const responseSchema = z.object({
     .max(100, "The character limit has been exceeded."),
 });
 
-export async function addResponse(
-  prevState: any,
-  { formData, tweetId }: { formData: FormData; tweetId: number }
-) {
+export async function addResponse({
+  formData,
+  tweetId,
+}: {
+  formData: FormData;
+  tweetId: number;
+}) {
   const data = {
     response: formData.get("response"),
   };
+
   const result = await responseSchema.safeParse(data);
 
   if (!result.success) {

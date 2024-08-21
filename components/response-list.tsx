@@ -1,16 +1,10 @@
 "use client";
 
-interface ResponseListProps {
-  responses: {
-    id: number;
-    response: string;
-    user: {
-      username: string;
-    };
-  }[];
+interface ResponsesProps {
+  responses: { id: number; response: string; user: { username: string } }[];
 }
 
-export default function ResponseList({ responses }: ResponseListProps) {
+export default function ResponseList({ responses }: ResponsesProps) {
   return (
     <div className="flex flex-col gap-6">
       {responses.map((response) => (
