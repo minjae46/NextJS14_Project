@@ -5,27 +5,38 @@ import { useOptimistic } from "react";
 import { addResponse } from "@/app/tweets/[id]/actions";
 import FormBtn from "./form-btn";
 import ResponseList from "./response-list";
+import { getMoreResponses } from "@/app/tweets/[id]/actions";
 
 interface AddResponseProps {
   tweetId: number;
-  responses: { id: number; response: string; user: { username: string } }[];
+  initialResponses: {
+    id: number;
+    response: string;
+    user: { username: string };
+  }[];
   username: string;
 }
 
 export default function AddResponse({
   tweetId,
-  responses,
+  initialResponses,
   username,
 }: AddResponseProps) {
+  const [responses, setResponses] = useState(initialResponses);
+  const [cursorId, setCursorId] = useState(
+    responses[responses.length - 1]?.id || 0
+  );
+  const [isLastResponse, setIsLastResponse] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<string[] | undefined>([]);
 
   const [state, reducerFn] = useOptimistic(
     responses,
-    (responses, payload: string) => {
+    (currentState, newResponse) => {
       return [
         {
-          id: 1,
-          response: payload,
+          id: Math.random(),
+          response: newResponse,
           user: {
             username: username,
           },
@@ -44,12 +55,43 @@ export default function AddResponse({
   }) => {
     const newResponse = formData.get("response");
     reducerFn(newResponse);
+
     const result = await addResponse({ formData, tweetId });
     if (result?.fieldErrors) {
       setErrors(result?.fieldErrors.response);
     } else {
       setErrors([]);
     }
+
+    setResponses((prev) => [
+      {
+        id: Math.random(),
+        response: newResponse,
+        user: {
+          username: username,
+        },
+      },
+      ...prev,
+    ]);
+    if (cursorId === 0) {
+      setIsLastResponse(true);
+    }
+  };
+
+  console.log("옵티미스틱 스테이트", state);
+  console.log("그냥 스테이트", responses);
+
+  const onLoadMoreResponsesClick = async () => {
+    setIsLoading(true);
+    const newResponses = await getMoreResponses(tweetId, cursorId);
+    const newCursorId = newResponses[newResponses.length - 1]?.id;
+    if (newResponses.length === 0) {
+      setIsLastResponse(true);
+    } else {
+      setCursorId(newCursorId);
+      setResponses((prev) => [...prev, ...newResponses]);
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -70,6 +112,11 @@ export default function AddResponse({
         <FormBtn text="Post Response" />
       </form>
       <ResponseList responses={state} />
+      {isLastResponse || responses.length === 0 ? null : (
+        <button onClick={onLoadMoreResponsesClick} disabled={isLoading}>
+          {isLoading ? "Loading..." : "Load more"}
+        </button>
+      )}
     </div>
   );
 }

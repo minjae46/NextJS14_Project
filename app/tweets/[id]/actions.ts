@@ -48,10 +48,11 @@ export async function addResponse({
   formData: FormData;
   tweetId: number;
 }) {
+  await new Promise((r) => setTimeout(r, 4000));
+
   const data = {
     response: formData.get("response"),
   };
-
   const result = await responseSchema.safeParse(data);
 
   if (!result.success) {
@@ -77,6 +78,30 @@ export async function addResponse({
       revalidatePath(`/tweets/${tweetId}`);
     }
   }
+}
+
+export async function getMoreResponses(tweetId: number, cursorId: number) {
+  const responses = await db.response.findMany({
+    where: {
+      tweetId,
+    },
+    select: {
+      id: true,
+      response: true,
+      user: {
+        select: {
+          username: true,
+        },
+      },
+    },
+    cursor: { id: cursorId },
+    skip: cursorId ? 1 : 0,
+    take: 2,
+    orderBy: {
+      created_at: "desc",
+    },
+  });
+  return responses;
 }
 
 export async function deleteTweet(tweetId: number) {

@@ -1,7 +1,11 @@
 "use client";
 
 interface ResponsesProps {
-  responses: { id: number; response: string; user: { username: string } }[];
+  responses: {
+    id: number;
+    response: string;
+    user: { username: string };
+  }[];
 }
 
 export default function ResponseList({ responses }: ResponsesProps) {

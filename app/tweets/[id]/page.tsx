@@ -78,7 +78,7 @@ async function getCachedLikeStatus(tweetId: number) {
   return cachedOperation(tweetId, userId!);
 }
 
-async function getResponses(tweetId: number) {
+async function getInitialResponses(tweetId: number) {
   const responses = await db.response.findMany({
     where: {
       tweetId,
@@ -92,21 +92,22 @@ async function getResponses(tweetId: number) {
         },
       },
     },
+    take: 2,
     orderBy: {
       created_at: "desc",
     },
   });
   return responses;
 }
-const getCachedResponses = nextCache(getResponses, ["response-list"]);
+const getCachedInitialResponses = nextCache(getInitialResponses, [
+  "response-list",
+]);
 
 export default async function TweetDetail({
   params,
 }: {
   params: { id: string };
 }) {
-  const username = await getUsername();
-
   const tweetId = Number(params.id);
   if (isNaN(tweetId)) {
     return notFound();
@@ -117,11 +118,13 @@ export default async function TweetDetail({
     return notFound();
   }
 
+  const username = await getUsername();
+
   const isOwner = await getIsOwner(tweet.userId);
 
   const { isLiked, likeCount } = await getCachedLikeStatus(tweetId);
 
-  const responses = await getCachedResponses(tweetId);
+  const initialResponses = await getCachedInitialResponses(tweetId);
 
   return (
     <div className="flex flex-col w-full gap-10 my-10">
@@ -151,7 +154,7 @@ export default async function TweetDetail({
       <LikeTweet isLiked={isLiked} likeCount={likeCount} tweetId={tweetId} />
       <AddResponse
         tweetId={tweetId}
-        responses={responses}
+        initialResponses={initialResponses}
         username={username!.username}
       />
       {isOwner ? <DeleteTweet tweetId={tweetId} /> : null}
