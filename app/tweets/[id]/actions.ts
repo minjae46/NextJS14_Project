@@ -76,8 +76,30 @@ export async function addResponse({
         },
       });
       revalidatePath(`/tweets/${tweetId}`);
+      return result.data.response;
     }
   }
+}
+
+export async function getNewResponse(tweetId: number) {
+  const newResponse = await db.response.findFirst({
+    where: {
+      tweetId,
+    },
+    orderBy: {
+      id: "desc",
+    },
+    select: {
+      id: true,
+      response: true,
+      user: {
+        select: {
+          username: true,
+        },
+      },
+    },
+  });
+  return newResponse;
 }
 
 export async function getMoreResponses(tweetId: number, cursorId: number) {

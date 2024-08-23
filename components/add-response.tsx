@@ -5,6 +5,7 @@ import { useOptimistic } from "react";
 import { addResponse } from "@/app/tweets/[id]/actions";
 import FormBtn from "./form-btn";
 import ResponseList from "./response-list";
+import { getNewResponse } from "@/app/tweets/[id]/actions";
 import { getMoreResponses } from "@/app/tweets/[id]/actions";
 
 interface AddResponseProps {
@@ -33,18 +34,11 @@ export default function AddResponse({
   const [state, reducerFn] = useOptimistic(
     responses,
     (currentState, newResponse) => {
-      return [
-        {
-          id: Math.random(),
-          response: newResponse,
-          user: {
-            username: username,
-          },
-        },
-        ...responses,
-      ];
+      return [newResponse, ...currentState];
     }
   );
+  console.log("옵티미스틱 스테이트", state);
+  console.log("페이지네이션 스테이트", responses);
 
   const action = async ({
     formData,
@@ -53,8 +47,14 @@ export default function AddResponse({
     formData: FormData;
     tweetId: number;
   }) => {
-    const newResponse = formData.get("response");
-    reducerFn(newResponse);
+    const newResponseText = formData.get("response");
+    reducerFn({
+      id: 0,
+      response: newResponseText,
+      user: {
+        username: username,
+      },
+    });
 
     const result = await addResponse({ formData, tweetId });
     if (result?.fieldErrors) {
@@ -62,24 +62,14 @@ export default function AddResponse({
     } else {
       setErrors([]);
     }
+    const newResponse = await getNewResponse(tweetId);
+    console.log("방금 생긴 댓글", newResponse);
+    setResponses((prev) => [newResponse, ...prev]);
 
-    setResponses((prev) => [
-      {
-        id: Math.random(),
-        response: newResponse,
-        user: {
-          username: username,
-        },
-      },
-      ...prev,
-    ]);
     if (cursorId === 0) {
       setIsLastResponse(true);
     }
   };
-
-  console.log("옵티미스틱 스테이트", state);
-  console.log("그냥 스테이트", responses);
 
   const onLoadMoreResponsesClick = async () => {
     setIsLoading(true);
