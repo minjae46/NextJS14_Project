@@ -47,7 +47,7 @@ async function getUserInitialTweets(id: number) {
   return tweets;
 }
 
-async function getIsOwner(userId: number) {
+async function getIsUser(userId: number) {
   const session = await getSession();
   if (session.id) {
     return session.id === userId;
@@ -66,7 +66,7 @@ export default async function UserProfile({
 
   const userInitialTweets = await getUserInitialTweets(userProfile!.id);
 
-  const isOwner = await getIsOwner(userProfile?.id);
+  const isUser = await getIsUser(userProfile!.id);
 
   return (
     <div className="flex flex-col w-full my-6 gap-10">
@@ -85,7 +85,7 @@ export default async function UserProfile({
             {userProfile?.email}
           </span>
         </div>
-        {isOwner ? (
+        {isUser ? (
           <Link href={`/users/${username}/edit`}>
             <span className="text-sm text-slate-700 bg-slate-200 w-fit mx-0 px-4 py-3 rounded-md hover:opacity-90 transition">
               Edit Profile
