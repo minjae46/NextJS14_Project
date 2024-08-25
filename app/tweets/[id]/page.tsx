@@ -143,12 +143,14 @@ export default async function TweetDetail({
         href={"/"}
         className="text-slate-700 font-medium hover:text-slate-700 hover:font-bold transition mb-10"
       >
-        Go to List
+        Go Back to List
       </Link>
       <div className="flex flex-col px-6 py-4 gap-6 rounded-xl ring-4 ring-slate-300">
-        <span className="text-xl font-semibold text-slate-500">
-          {tweet.user.username}
-        </span>
+        <Link href={`/users/${tweet.user.username}`}>
+          <span className="text-xl font-semibold text-slate-500">
+            {tweet.user.username}
+          </span>
+        </Link>
         <span className="text-lg font-medium text-slate-700">
           {tweet.tweet}
         </span>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import getSession from "@/lib/session";
 import db from "@/lib/db";
 import TweetList from "@/components/tweet-list";
 
@@ -11,6 +12,7 @@ async function getUserProfile(username: string) {
       id: true,
       username: true,
       email: true,
+      bio: true,
     },
   });
   return userProfile;
@@ -45,6 +47,14 @@ async function getUserInitialTweets(id: number) {
   return tweets;
 }
 
+async function getIsOwner(userId: number) {
+  const session = await getSession();
+  if (session.id) {
+    return session.id === userId;
+  }
+  return false;
+}
+
 export default async function UserProfile({
   params,
 }: {
@@ -56,22 +66,34 @@ export default async function UserProfile({
 
   const userInitialTweets = await getUserInitialTweets(userProfile!.id);
 
+  const isOwner = await getIsOwner(userProfile?.id);
+
   return (
     <div className="flex flex-col w-full my-6 gap-10">
       <Link
         href={"/"}
         className="text-slate-700 font-medium hover:text-slate-700 hover:font-bold transition"
       >
-        Go to Home
+        Go Back to Home
       </Link>
-      <div className="flex flex-col">
-        <span className="text-slate-700 font-semibold text-2xl">
-          {userProfile?.username}
-        </span>
-        <span className="text-slate-400 font-md text-lg">
-          {userProfile?.email}
-        </span>
+      <div className="flex justify-between items-center">
+        <div className="flex flex-col">
+          <span className="text-slate-700 font-semibold text-2xl">
+            {userProfile?.username}
+          </span>
+          <span className="text-slate-400 font-md text-lg">
+            {userProfile?.email}
+          </span>
+        </div>
+        {isOwner ? (
+          <Link href={`/users/${username}/edit`}>
+            <span className="text-sm text-slate-700 bg-slate-200 w-fit mx-0 px-4 py-3 rounded-md hover:opacity-90 transition">
+              Edit Profile
+            </span>
+          </Link>
+        ) : null}
       </div>
+      <span className="text-slate-600 font-medium">{userProfile?.bio}</span>
       {userInitialTweets.length ? (
         <TweetList initialTweets={userInitialTweets} />
       ) : (

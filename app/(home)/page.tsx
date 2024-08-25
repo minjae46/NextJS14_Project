@@ -64,7 +64,6 @@ export default async function Home() {
             {user?.username}
           </span>
         </Link>
-
         <form action={logOut} className="flex ">
           <button className="text-slate-700 font-medium text-sm hover:text-slate-700 hover:font-bold transition">
             로그아웃
