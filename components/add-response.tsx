@@ -35,7 +35,7 @@ export default function AddResponse({
 
   const [state, reducerFn] = useOptimistic(
     responses,
-    (currentState, newResponse) => {
+    (currentState, newResponse: any) => {
       return [newResponse, ...currentState];
     }
   );
@@ -57,14 +57,15 @@ export default function AddResponse({
     });
 
     const result = await addResponse({ formData, tweetId });
-    if (result?.fieldErrors) {
-      setErrors(result?.fieldErrors.response);
+    const errors = result?.fieldErrors.response;
+
+    if (errors) {
+      setErrors(errors);
     } else {
       setErrors([]);
+      const newResponse = await getNewResponse(tweetId);
+      setResponses((prev: any) => [newResponse, ...prev]);
     }
-    const newResponse = await getNewResponse(tweetId);
-
-    setResponses((prev) => [newResponse, ...prev]);
 
     if (cursorId === 0) {
       setIsLastResponse(true);
@@ -106,7 +107,7 @@ export default function AddResponse({
         <button
           onClick={onLoadMoreResponsesClick}
           disabled={isLoading}
-          className="mx-auto text-sm text-slate-600 bg-slate-300 w-fit mx-0 px-3 py-2 rounded-md hover:opacity-90 transition"
+          className="mx-auto text-sm text-slate-600 bg-slate-300 w-fit px-3 py-2 rounded-md hover:opacity-90 transition"
         >
           {isLoading ? "Loading..." : "Load more"}
         </button>

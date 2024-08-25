@@ -76,7 +76,6 @@ export async function addResponse({
         },
       });
       revalidatePath(`/tweets/${tweetId}`);
-      return result.data.response;
     }
   }
 }
