@@ -1,3 +1,4 @@
+import Link from "next/link";
 import db from "@/lib/db";
 import getSession from "@/lib/session";
 import { redirect } from "next/navigation";
@@ -58,10 +59,13 @@ export default async function Home() {
   return (
     <div className="flex flex-col w-full gap-6 my-6">
       <div className="flex justify-between items-center">
-        <span className="text-slate-700 font-semibold text-2xl">
-          {user?.username}
-        </span>
-        <form action={logOut} className="flex justify-end">
+        <Link href={`users/${user?.username}`}>
+          <span className="text-slate-700 font-semibold text-2xl">
+            {user?.username}
+          </span>
+        </Link>
+
+        <form action={logOut} className="flex ">
           <button className="text-slate-700 font-medium text-sm hover:text-slate-700 hover:font-bold transition">
             로그아웃
           </button>
