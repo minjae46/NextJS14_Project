@@ -92,7 +92,7 @@ async function getInitialResponses(tweetId: number) {
         },
       },
     },
-    take: 2,
+    take: 3,
     orderBy: {
       created_at: "desc",
     },
@@ -102,6 +102,15 @@ async function getInitialResponses(tweetId: number) {
 const getCachedInitialResponses = nextCache(getInitialResponses, [
   "response-list",
 ]);
+
+async function getTotalResponses(tweetId: number) {
+  const responses = await db.response.findMany({
+    where: {
+      tweetId,
+    },
+  });
+  return responses.length;
+}
 
 export default async function TweetDetail({
   params,
@@ -126,18 +135,20 @@ export default async function TweetDetail({
 
   const initialResponses = await getCachedInitialResponses(tweetId);
 
+  const totalResponses = await getTotalResponses(tweetId);
+
   return (
-    <div className="flex flex-col w-full gap-10 my-10">
-      <h1 className="text-slate-700 font-semibold text-2xl">
-        {tweet.user.username} Tweet
-      </h1>
+    <div className="flex flex-col w-full my-6">
       <Link
         href={"/"}
-        className="text-slate-700 font-medium hover:text-slate-700 hover:font-bold transition"
+        className="text-slate-700 font-medium hover:text-slate-700 hover:font-bold transition mb-10"
       >
         Go to List
       </Link>
-      <div className="flex flex-col px-6 py-4 gap-2 rounded-xl ring-4 ring-slate-300">
+      <div className="flex flex-col px-6 py-4 gap-6 rounded-xl ring-4 ring-slate-300">
+        <span className="text-xl font-semibold text-slate-500">
+          {tweet.user.username}
+        </span>
         <span className="text-lg font-medium text-slate-700">
           {tweet.tweet}
         </span>
@@ -147,17 +158,20 @@ export default async function TweetDetail({
               timeZone: "Asia/Seoul",
             })}
           </span>
-          <span className="text-md text-slate-500">{tweet.user.username}</span>
         </div>
       </div>
 
-      <LikeTweet isLiked={isLiked} likeCount={likeCount} tweetId={tweetId} />
+      <div className="flex justify-between items-center">
+        <LikeTweet isLiked={isLiked} likeCount={likeCount} tweetId={tweetId} />
+        {isOwner ? <DeleteTweet tweetId={tweetId} /> : null}
+      </div>
+
       <AddResponse
         tweetId={tweetId}
         initialResponses={initialResponses}
+        totalResponses={totalResponses}
         username={username!.username}
       />
-      {isOwner ? <DeleteTweet tweetId={tweetId} /> : null}
     </div>
   );
 }

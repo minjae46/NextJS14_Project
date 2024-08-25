@@ -38,7 +38,7 @@ const responseSchema = z.object({
   response: z
     .string()
     .min(5, "Tweet should be at least 5 characters long.")
-    .max(100, "The character limit has been exceeded."),
+    .max(65, "The character limit has been exceeded."),
 });
 
 export async function addResponse({
@@ -48,7 +48,7 @@ export async function addResponse({
   formData: FormData;
   tweetId: number;
 }) {
-  await new Promise((r) => setTimeout(r, 4000));
+  // await new Promise((r) => setTimeout(r, 4000));
 
   const data = {
     response: formData.get("response"),

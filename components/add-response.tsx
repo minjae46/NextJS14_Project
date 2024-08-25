@@ -15,12 +15,14 @@ interface AddResponseProps {
     response: string;
     user: { username: string };
   }[];
+  totalResponses: number;
   username: string;
 }
 
 export default function AddResponse({
   tweetId,
   initialResponses,
+  totalResponses,
   username,
 }: AddResponseProps) {
   const [responses, setResponses] = useState(initialResponses);
@@ -37,8 +39,6 @@ export default function AddResponse({
       return [newResponse, ...currentState];
     }
   );
-  console.log("옵티미스틱 스테이트", state);
-  console.log("페이지네이션 스테이트", responses);
 
   const action = async ({
     formData,
@@ -49,7 +49,7 @@ export default function AddResponse({
   }) => {
     const newResponseText = formData.get("response");
     reducerFn({
-      id: 0,
+      id: Math.random(),
       response: newResponseText,
       user: {
         username: username,
@@ -63,7 +63,7 @@ export default function AddResponse({
       setErrors([]);
     }
     const newResponse = await getNewResponse(tweetId);
-    console.log("방금 생긴 댓글", newResponse);
+
     setResponses((prev) => [newResponse, ...prev]);
 
     if (cursorId === 0) {
@@ -85,14 +85,14 @@ export default function AddResponse({
   };
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       <form action={(formData) => action({ formData, tweetId })}>
         <textarea
           name="response"
-          placeholder="What's your response?"
-          maxLength={110}
+          placeholder="Write your response!"
+          maxLength={70}
           required
-          className="px-4 py-3 placeholder:text-slate-400 bg-transparent rounded-xl w-full h-24 focus:outline-none ring-2 transition ring-slate-300 focus:ring-4 border-none resize-none"
+          className="px-4 py-3 mb-1 placeholder:text-slate-400 bg-transparent rounded-xl w-full h-22 focus:outline-none ring-2 transition ring-slate-300 focus:ring-4 border-none resize-none"
         ></textarea>
         {errors?.map((error, index) => (
           <span key={index} className="text-red-600">
@@ -102,8 +102,12 @@ export default function AddResponse({
         <FormBtn text="Post Response" />
       </form>
       <ResponseList responses={state} />
-      {isLastResponse || responses.length === 0 ? null : (
-        <button onClick={onLoadMoreResponsesClick} disabled={isLoading}>
+      {isLastResponse || responses.length >= totalResponses ? null : (
+        <button
+          onClick={onLoadMoreResponsesClick}
+          disabled={isLoading}
+          className="mx-auto text-sm text-slate-600 bg-slate-300 w-fit mx-0 px-3 py-2 rounded-md hover:opacity-90 transition"
+        >
           {isLoading ? "Loading..." : "Load more"}
         </button>
       )}

@@ -65,19 +65,19 @@ export default function TweetList({ initialTweets }: TweetListProps) {
   };
 
   return (
-    <div className="flex flex-col justify-between">
-      <div className="flex flex-col gap-6">
+    <div className="flex flex-col justify-between gap-6">
+      <div className="flex flex-col gap-5">
         {tweets.map((tweet) => (
           <Link key={tweet.id} href={`/tweets/${tweet.id}`}>
             <ListTweet {...tweet} />
           </Link>
         ))}
       </div>
-      <div className="flex justify-between mt-10">
+      <div className="flex justify-between">
         {page === 1 ? (
           <button
             disabled={true}
-            className="text-sm bg-gray-500 w-fit mx-0 px-3 py-2 rounded-md"
+            className="text-sm text-gray-500 w-fit mx-0 px-3 py-2 rounded-md"
           >
             first page
           </button>
@@ -85,7 +85,7 @@ export default function TweetList({ initialTweets }: TweetListProps) {
           <button
             onClick={onLoadPrevClick}
             disabled={isLoading}
-            className="text-sm text-white bg-blue-500 w-fit mx-0 px-3 py-2 rounded-md hover:opacity-90 transition"
+            className="text-sm text-slate-600 bg-slate-300 w-fit mx-0 px-3 py-2 rounded-md hover:opacity-90 transition"
           >
             {isLoading ? "loading" : "prev page"}
           </button>
@@ -94,7 +94,7 @@ export default function TweetList({ initialTweets }: TweetListProps) {
         {isLastPage ? (
           <button
             disabled={true}
-            className="text-sm bg-gray-500 w-fit mx-0 px-3 py-2 rounded-md"
+            className="text-sm text-gray-500 w-fit mx-0 px-3 py-2 rounded-md"
           >
             last page
           </button>
@@ -102,7 +102,7 @@ export default function TweetList({ initialTweets }: TweetListProps) {
           <button
             onClick={onLoadNextClick}
             disabled={isLoading}
-            className="text-sm text-white bg-blue-500 w-fit mx-0 px-3 py-2 rounded-md hover:opacity-90 transition"
+            className="text-sm text-slate-600 bg-slate-300 w-fit mx-0 px-3 py-2 rounded-md hover:opacity-90 transition"
           >
             {isLoading ? "loading" : "next page"}
           </button>

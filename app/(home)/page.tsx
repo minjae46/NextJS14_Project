@@ -56,15 +56,17 @@ export default async function Home() {
   const initialTweets = await getInitialTweets();
 
   return (
-    <div className="flex flex-col w-full gap-6 my-10">
-      <h1 className="text-slate-700 font-semibold text-2xl">
-        Welcome, {user?.username}
-      </h1>
-      <form action={logOut} className="flex justify-end">
-        <button className="text-slate-700 font-medium hover:text-slate-700 hover:font-bold transition">
-          로그아웃
-        </button>
-      </form>
+    <div className="flex flex-col w-full gap-6 my-6">
+      <div className="flex justify-between items-center">
+        <span className="text-slate-700 font-semibold text-2xl">
+          {user?.username}
+        </span>
+        <form action={logOut} className="flex justify-end">
+          <button className="text-slate-700 font-medium text-sm hover:text-slate-700 hover:font-bold transition">
+            로그아웃
+          </button>
+        </form>
+      </div>
       <AddTweet />
       {initialTweets.length ? (
         <TweetList initialTweets={initialTweets} />
