@@ -1,1 +1,1 @@
-# NextJS 14 Practice Project
+# NextJS 14 Project MINI COMMUNITY
